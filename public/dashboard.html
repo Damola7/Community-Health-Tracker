@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2>Your Health Metrics</h2>
+    <table id="metrics-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Weight</th>
+                <th>Blood Pressure</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Health metrics will be inserted here -->
+        </tbody>
+    </table>
+
+    <h3>Delete Your Account</h3>
+    <form id="delete-account-form">
+        <button type="submit">Delete Account</button>
+    </form>
+
+    <h3>Logout</h3>
+    <button id="logout-button">Logout</button>
+
+    <script>
+       document.addEventListener('DOMContentLoaded', async () => {
+            const response = await fetch('/get-health-metrics');
+            const metrics = await response.json();
+            const tableBody = document.querySelector('#metrics-table tbody');
+
+            metrics.forEach(metric => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td>${metric.date}</td>
+            <td>${metric.weight}</td>
+            <td>${metric.blood_pressure}</td>
+        `;
+                tableBody.appendChild(row);
+            });
+        });
+
+        // Handle logout button click
+        document.getElementById('logout-button').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/logout', { method: 'GET' });
+                if (response.ok) {
+                    alert('Log Out Successful');
+                    window.location.href = 'login.html'; // Redirect to login page after logout
+                } else {
+                    alert('Error logging out');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        document.getElementById('delete-account-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                try {
+                    const response = await fetch('/delete-account', {
+                        method: 'POST',
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Account Succesfully Deleted!');
+                        window.location.href = 'register.html';
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
